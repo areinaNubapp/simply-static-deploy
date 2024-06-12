@@ -86,7 +86,7 @@ class Api
 
     public function simply_static_deploy(WP_REST_Request $request)
     {
-        Util::delete_debug_log();
+        Util::clear_debug_log();
         Util::debug_log(
             "Received request to start generating a static archive"
         );
@@ -101,7 +101,7 @@ class Api
         $post_id = $request->get_param('post_id');
         $recursive = (bool)$request->get_param('recursive');
 
-        Util::delete_debug_log();
+        Util::clear_debug_log();
         Util::debug_log(sprintf('Received request to start %s deploy for postId: %s.',
                 $recursive ? 'recursive static' : 'static',
                 $post_id

@@ -32,12 +32,6 @@ class Admin
         add_action('admin_menu', [$this, 'admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'register_assets']);
         add_action('wp_before_admin_bar_render', [$this, 'admin_bar']);
-
-        add_action('post_submitbox_misc_actions', [
-            $this,
-            'post_submitbox_misc_actions',
-        ]);
-        add_action('admin_footer', [$this, 'render_deploy_single_form']);
     }
 
     public function admin_bar()
@@ -113,58 +107,6 @@ class Admin
         $renderer->render();
     }
 
-    public function post_submitbox_misc_actions($post)
-    {
-        if (!$this->eligible_for_single_deploy($post)) {
-            return;
-        }
-        $is_job_done = StaticDeployJob::is_job_done();
-        $renderer = new Renderer(
-            $this->basePath . 'views/post-submit-actions.php',
-            [
-                'form_id' => static::DEPLOY_FORM_ID,
-                'status' => $is_job_done ? 'ready' : 'busy',
-                'status_message' => $is_job_done
-                    ? 'Ready for deployment'
-                    : 'Deployment in progress..',
-                'poll_status_endpoint' => $this->get_endpoints()['poll_status'],
-            ]
-        );
-        $renderer->render();
-    }
-
-    public function render_deploy_single_form()
-    {
-        $screen = get_current_screen();
-        if (!($screen->base === 'post' && $screen->parent_base === 'edit')) {
-            return;
-        }
-
-        $post = get_post();
-        if (!$this->eligible_for_single_deploy($post)) {
-            return;
-        }
-        $form = (object) [
-            'id' => static::DEPLOY_FORM_ID,
-            'action' => $this->get_endpoints()['generate_single'],
-            'method' => 'POST',
-        ];
-        $renderer = new Renderer(
-            $this->basePath . 'views/deploy-single-form.php',
-            [
-                'form' => $form,
-                'post' => $post,
-            ]
-        );
-        $renderer->render();
-    }
-
-    public function eligible_for_single_deploy(WP_Post $post)
-    {
-        $post_type_object = get_post_type_object($post->post_type);
-        return $post_type_object->public;
-    }
-
     private function get_tasks(): array
     {
         $tasks = ['generate', 'sync'];
@@ -184,9 +126,6 @@ class Admin
     private function get_asset_url(string $filename): string
     {
         return rtrim($this->baseUrl, '/') . '/assets/' . $filename;
-        $relative_assets_dir =
-            substr($this->basePath, strlen(get_theme_file_path())) . '/assets';
-        return get_theme_file_uri($relative_assets_dir . '/' . $filename);
     }
 
     private function get_icon(string $filename): string

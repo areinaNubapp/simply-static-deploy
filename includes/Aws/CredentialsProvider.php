@@ -1,6 +1,6 @@
 <?php namespace Grrr\SimplyStaticDeploy\Aws;
 
-use GuzzleHttp\Promise;
+use GuzzleHttp\Promise\Create;
 use Aws\Credentials\Credentials;
 
 class CredentialsProvider
@@ -17,7 +17,7 @@ class CredentialsProvider
     public function getCredentials(): callable
     {
         return function () {
-            return Promise\promise_for(
+            return Create::promiseFor(
                 new Credentials($this->key, $this->secret)
             );
         };
