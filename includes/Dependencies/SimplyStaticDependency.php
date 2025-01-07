@@ -4,9 +4,8 @@ class SimplyStaticDependency implements DependencyInterface
 {
     public function is_met(): bool
     {
-        // https://waclawjacek.com/check-wordpress-plugin-dependencies/
-        $activePlugins = apply_filters('active_plugins', get_option('active_plugins'));
-        return in_array('simply-static/simply-static.php', $activePlugins);
+        include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+        return is_plugin_active( 'simply-static/simply-static.php');
     }
 
     public function register_notifications()
